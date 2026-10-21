@@ -1,0 +1,567 @@
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
+import { User } from '../models/User.js';
+import { Project } from '../models/Project.js';
+import { Payment } from '../models/Payment.js';
+
+dotenv.config();
+
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/evo-art-designer-hub';
+
+export const seedDatabase = async () => {
+  try {
+    console.log('[Seeder] Connecting to MongoDB at', MONGODB_URI);
+    await mongoose.connect(MONGODB_URI);
+    console.log('[Seeder] Connected.');
+
+    await User.deleteMany({});
+    await Project.deleteMany({});
+    await Payment.deleteMany({});
+    console.log('[Seeder] Existing collections purged.');
+
+    const defaultPassword = 'password123';
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(defaultPassword, salt);
+
+    const usersData = [
+      {
+        id: 'admin',
+        name: 'EVO Admin',
+        ini: 'AD',
+        email: 'admin@evoart.io',
+        passwordHash,
+        role: 'admin',
+        phone: '+94 77 123 4567',
+        skills: ['Management', 'Art Direction'],
+        rating: 5.0,
+        active: true,
+        limit: 10,
+        load: 0,
+        joined: 'Jan 2025',
+        earned: 0,
+        bids: 0,
+        won: 0,
+      },
+      {
+        id: 'D1',
+        name: 'Kasun Perera',
+        ini: 'KP',
+        email: 'kasun@evoart.lk',
+        passwordHash,
+        role: 'designer',
+        phone: '+94 77 123 4567',
+        skills: ['Packaging', 'Branding', 'Print'],
+        rating: 4.9,
+        active: true,
+        limit: 2,
+        load: 1,
+        joined: 'Jan 2025',
+        earned: 185000,
+        bids: 18,
+        won: 11,
+        portfolio: 'behance.net/kasunp',
+      },
+      {
+        id: 'D2',
+        name: 'Dilani Silva',
+        ini: 'DS',
+        email: 'dilani@evoart.lk',
+        passwordHash,
+        role: 'designer',
+        phone: '+94 71 888 2341',
+        skills: ['Social Media', 'Motion Graphics', 'UI/UX'],
+        rating: 4.8,
+        active: true,
+        limit: 2,
+        load: 0,
+        joined: 'Feb 2025',
+        earned: 142000,
+        bids: 14,
+        won: 8,
+        portfolio: 'dribbble.com/dilanis',
+      },
+      {
+        id: 'D3',
+        name: 'Rohan Fernando',
+        ini: 'RF',
+        email: 'rohan@evoart.lk',
+        passwordHash,
+        role: 'designer',
+        phone: '+94 76 555 9012',
+        skills: ['Packaging', 'Typography', 'Illustration'],
+        rating: 4.6,
+        active: true,
+        limit: 1,
+        load: 1,
+        joined: 'Nov 2024',
+        earned: 220000,
+        bids: 24,
+        won: 13,
+        portfolio: 'instagram.com/rohan_designs',
+      },
+      {
+        id: 'D4',
+        name: 'Anuki Perera',
+        ini: 'AP',
+        email: 'anuki@evoart.lk',
+        passwordHash,
+        role: 'designer',
+        phone: '+94 70 333 1198',
+        skills: ['Branding', 'Print', 'Signage'],
+        rating: 4.7,
+        active: true,
+        limit: 2,
+        load: 0,
+        joined: 'Mar 2025',
+        earned: 96000,
+        bids: 9,
+        won: 5,
+        portfolio: 'anukidesigns.com',
+      },
+      {
+        id: 'D5',
+        name: 'Malik Jayasinghe',
+        ini: 'MJ',
+        email: 'malik@evoart.lk',
+        passwordHash,
+        role: 'designer',
+        phone: '+94 72 444 8765',
+        skills: ['3D Modeling', 'Packaging', 'Motion Graphics'],
+        rating: 4.4,
+        active: false,
+        limit: 2,
+        load: 0,
+        joined: 'Oct 2024',
+        earned: 175000,
+        bids: 19,
+        won: 9,
+        portfolio: 'artstation.com/malikjay',
+      },
+    ];
+
+    await User.insertMany(usersData);
+    console.log(`[Seeder] Seeded ${usersData.length} users.`);
+
+    const projectsData = [
+      {
+        id: 'P1',
+        code: 'P1',
+        title: 'Ceylon Cinnamon Box Rebrand',
+        category: 'Packaging',
+        skill: 'Packaging',
+        status: 'open',
+        client: 'Lanka Spice Exports Ltd',
+        max: 35000,
+        opens: Date.now() - 14 * 3600 * 1000,
+        closes: Date.now() + 34 * 3600 * 1000,
+        days: 4,
+        revisions: 2,
+        minRating: 4.5,
+        brief:
+          'Design an export-grade gift box packaging for Ceylon Cinnamon sticks. Target market is high-end EU retailers. Emphasize organic origin and sustainable luxury.',
+        deliverables: ['Box die-line in AI', 'High-res print PDF with spot UV', '3D render on black background'],
+        refs: [
+          { name: 'EU_luxury_tea_packaging_benchmarks.pdf', size: '4.8 MB' },
+          { name: 'cinnamon_brand_guidelines_v2.pdf', size: '2.1 MB' },
+        ],
+        clientFiles: [],
+        bids: [
+          {
+            d: 'D1',
+            amount: 28000,
+            days: 3,
+            note: 'Experienced with export food packaging die-lines.',
+            portfolio: 'behance.net/kasunp',
+            at: Date.now() - 12 * 3600 * 1000,
+          },
+          {
+            d: 'D3',
+            amount: 30000,
+            days: 4,
+            note: 'Includes 3 realistic 3D renders.',
+            portfolio: 'instagram.com/rohan_designs',
+            at: Date.now() - 10 * 3600 * 1000,
+          },
+          {
+            d: 'D2',
+            amount: 32000,
+            days: 3,
+            note: 'Fast turnaround, full dieline prep.',
+            portfolio: 'dribbble.com/dilanis',
+            at: Date.now() - 8 * 3600 * 1000,
+          },
+        ],
+        awardedTo: null,
+        deliveries: [],
+        revUsed: 0,
+        comments: [
+          {
+            by: 'Admin',
+            text: 'Please confirm whether foil stamping should be included in the dieline layer.',
+            at: Date.now() - 6 * 3600 * 1000,
+          },
+          {
+            by: 'Kasun Perera',
+            text: 'Yes, I will supply spot UV and gold foil as separate technical spot layers.',
+            at: Date.now() - 5 * 3600 * 1000,
+          },
+        ],
+        activity: [
+          { at: Date.now() - 14 * 3600 * 1000, text: 'Project published and sealed bidding opened.' },
+          { at: Date.now() - 12 * 3600 * 1000, text: 'Kasun Perera placed a sealed bid.' },
+          { at: Date.now() - 10 * 3600 * 1000, text: 'Rohan Fernando placed a sealed bid.' },
+          { at: Date.now() - 8 * 3600 * 1000, text: 'Dilani Silva placed a sealed bid.' },
+        ],
+        visibility: 'All designers',
+        visibleTo: [],
+      },
+      {
+        id: 'P2',
+        code: 'P2',
+        title: 'Verdant Herbal Tea Pouch Range',
+        category: 'Packaging',
+        skill: 'Packaging',
+        status: 'closed',
+        client: 'Verdant Organics',
+        max: 42000,
+        opens: Date.now() - 50 * 3600 * 1000,
+        closes: Date.now() - 2 * 3600 * 1000,
+        days: 5,
+        revisions: 2,
+        minRating: 4.5,
+        brief: 'Pouch packaging family for 3 SKUs: Moringa, Chamomile, Green Tea. Modern matte finish.',
+        deliverables: ['3 Stand-up pouch artworks', 'Print-ready CMYK + White layer'],
+        refs: [{ name: 'verdant_pouch_dieline.ai', size: '6.4 MB' }],
+        clientFiles: [],
+        bids: [
+          {
+            d: 'D3',
+            amount: 38000,
+            days: 4,
+            note: 'Full 3-SKU packaging family layout.',
+            portfolio: '',
+            at: Date.now() - 30 * 3600 * 1000,
+          },
+          {
+            d: 'D1',
+            amount: 39500,
+            days: 5,
+            note: 'Experienced with matte pouch print separation.',
+            portfolio: '',
+            at: Date.now() - 28 * 3600 * 1000,
+          },
+        ],
+        awardedTo: null,
+        deliveries: [],
+        revUsed: 0,
+        comments: [],
+        activity: [
+          { at: Date.now() - 50 * 3600 * 1000, text: 'Project published.' },
+          { at: Date.now() - 2 * 3600 * 1000, text: 'Bidding closed. Pending award.' },
+        ],
+        visibility: 'All designers',
+        visibleTo: [],
+      },
+      {
+        id: 'P3',
+        code: 'P3',
+        title: 'Hiru Solar Brand Identity & Guidelines',
+        category: 'Branding',
+        skill: 'Branding',
+        status: 'awarded',
+        client: 'Hiru Energy Technologies',
+        max: 55000,
+        opens: Date.now() - 72 * 3600 * 1000,
+        closes: Date.now() - 24 * 3600 * 1000,
+        days: 6,
+        revisions: 2,
+        minRating: 4.6,
+        brief:
+          'Complete brand identity for renewable energy installer: primary mark, typography palette, vehicle wrap guide, stationery.',
+        deliverables: ['Vector logo pack', 'Brand guideline 24-page PDF', 'Van livery mockups'],
+        refs: [{ name: 'company_profile.pdf', size: '3.1 MB' }],
+        clientFiles: [],
+        bids: [
+          {
+            d: 'D4',
+            amount: 48000,
+            days: 5,
+            note: 'Delivered 4 solar brand identities in 2024.',
+            portfolio: '',
+            at: Date.now() - 50 * 3600 * 1000,
+          },
+          {
+            d: 'D1',
+            amount: 50000,
+            days: 6,
+            note: 'Comprehensive brand toolkit.',
+            portfolio: '',
+            at: Date.now() - 40 * 3600 * 1000,
+          },
+        ],
+        awardedTo: 'D4',
+        award: {
+          amount: 48000,
+          at: Date.now() - 20 * 3600 * 1000,
+          reason: 'Rank #1 sealed bid + prior solar branding experience.',
+        },
+        deliveries: [],
+        revUsed: 0,
+        comments: [],
+        activity: [
+          { at: Date.now() - 72 * 3600 * 1000, text: 'Project published.' },
+          { at: Date.now() - 20 * 3600 * 1000, text: 'Awarded to Anuki Perera for LKR 48,000.' },
+        ],
+        visibility: 'All designers',
+        visibleTo: [],
+      },
+      {
+        id: 'P4',
+        code: 'P4',
+        title: 'Kandy Gourmet Jam Label Suite',
+        category: 'Packaging',
+        skill: 'Packaging',
+        status: 'progress',
+        client: 'Hill Country Preserves',
+        max: 30000,
+        opens: Date.now() - 120 * 3600 * 1000,
+        closes: Date.now() - 72 * 3600 * 1000,
+        days: 4,
+        revisions: 2,
+        minRating: 4.5,
+        brief: 'Artisanal jar labels for Passionfruit, Mango-Chilli, and Woodapple preserves. Heritage aesthetic.',
+        deliverables: ['Front & back jar label dieline', 'Vector illustrations of fruits', 'Print-ready PDF'],
+        refs: [{ name: 'jar_specs_300ml.pdf', size: '1.2 MB' }],
+        clientFiles: [],
+        bids: [
+          {
+            d: 'D1',
+            amount: 26000,
+            days: 3,
+            note: 'Handcrafted watercolor style available.',
+            portfolio: '',
+            at: Date.now() - 90 * 3600 * 1000,
+          },
+        ],
+        awardedTo: 'D1',
+        award: {
+          amount: 26000,
+          at: Date.now() - 70 * 3600 * 1000,
+          reason: 'Accepted proposal.',
+        },
+        deliveries: [
+          {
+            v: 1,
+            at: Date.now() - 24 * 3600 * 1000,
+            note: 'Initial layout draft with typography & fruit watercolors.',
+            status: 'Revision requested',
+            files: [{ name: 'Kandy_Jam_v1_layouts.pdf', size: '12.4 MB' }],
+          },
+        ],
+        revUsed: 1,
+        comments: [
+          {
+            by: 'Admin',
+            text: 'Client requested slightly darker woodcut styling on the woodapple icon.',
+            at: Date.now() - 16 * 3600 * 1000,
+          },
+        ],
+        activity: [
+          { at: Date.now() - 70 * 3600 * 1000, text: 'Awarded to Kasun Perera.' },
+          { at: Date.now() - 24 * 3600 * 1000, text: 'Version 1 submitted.' },
+          { at: Date.now() - 16 * 3600 * 1000, text: 'Revision requested.' },
+        ],
+        visibility: 'All designers',
+        visibleTo: [],
+      },
+      {
+        id: 'P5',
+        code: 'P5',
+        title: 'Avurudu Festive Campaign Social Suite',
+        category: 'Social Media',
+        skill: 'Social Media',
+        status: 'review',
+        client: 'BakeHouse PLC',
+        max: 28000,
+        opens: Date.now() - 160 * 3600 * 1000,
+        closes: Date.now() - 120 * 3600 * 1000,
+        days: 3,
+        revisions: 2,
+        minRating: 4.4,
+        brief: '10 static square posts + 4 story templates for Sinhala & Tamil New Year festive promos.',
+        deliverables: ['10 IG square posts', '4 IG stories in Figma', 'Asset exports in PNG/JPG'],
+        refs: [{ name: 'festive_offer_schedule.xlsx', size: '44 KB' }],
+        clientFiles: [],
+        bids: [
+          {
+            d: 'D2',
+            amount: 24000,
+            days: 3,
+            note: 'Full festive suite in Figma with reusable components.',
+            portfolio: '',
+            at: Date.now() - 140 * 3600 * 1000,
+          },
+        ],
+        awardedTo: 'D2',
+        award: {
+          amount: 24000,
+          at: Date.now() - 118 * 3600 * 1000,
+          reason: 'Best turnaround time and portfolio.',
+        },
+        deliveries: [
+          {
+            v: 1,
+            at: Date.now() - 12 * 3600 * 1000,
+            note: 'Final full suite with all 10 posts and 4 stories.',
+            status: 'In review',
+            files: [{ name: 'BakeHouse_Avurudu_Complete.zip', size: '28.1 MB' }],
+          },
+        ],
+        revUsed: 0,
+        comments: [
+          {
+            by: 'Dilani Silva',
+            text: 'Uploaded all high-res assets plus the Figma source link in the archive.',
+            at: Date.now() - 11 * 3600 * 1000,
+          },
+        ],
+        activity: [
+          { at: Date.now() - 118 * 3600 * 1000, text: 'Awarded to Dilani Silva.' },
+          { at: Date.now() - 12 * 3600 * 1000, text: 'Delivery v1 submitted for client approval.' },
+        ],
+        visibility: 'All designers',
+        visibleTo: [],
+      },
+      {
+        id: 'P6',
+        code: 'P6',
+        title: 'Ayurvedic Spa Essential Oils Carton',
+        category: 'Packaging',
+        skill: 'Packaging',
+        status: 'completed',
+        client: 'Suwada Herbals',
+        max: 32000,
+        opens: Date.now() - 250 * 3600 * 1000,
+        closes: Date.now() - 210 * 3600 * 1000,
+        days: 4,
+        revisions: 2,
+        minRating: 4.5,
+        brief: 'Luxury gold-leaf embossed folding carton for 50ml glass dropper bottles.',
+        deliverables: ['Folding carton dieline', 'Emboss & foil separation plates', '3D renders'],
+        refs: [{ name: 'suwada_dropper_dieline.ai', size: '3.4 MB' }],
+        clientFiles: [],
+        bids: [
+          {
+            d: 'D3',
+            amount: 31000,
+            days: 4,
+            note: 'Experience with luxury embossing tolerances.',
+            portfolio: '',
+            at: Date.now() - 220 * 3600 * 1000,
+          },
+        ],
+        awardedTo: 'D3',
+        award: {
+          amount: 31000,
+          at: Date.now() - 208 * 3600 * 1000,
+          reason: 'Best match for luxury finish.',
+        },
+        deliveries: [
+          {
+            v: 1,
+            at: Date.now() - 100 * 3600 * 1000,
+            note: 'Final press-ready art approved by client printer.',
+            status: 'Approved',
+            files: [{ name: 'Suwada_PressReady_Final.pdf', size: '18.9 MB' }],
+          },
+        ],
+        revUsed: 0,
+        comments: [],
+        activity: [
+          { at: Date.now() - 208 * 3600 * 1000, text: 'Awarded to Rohan Fernando.' },
+          { at: Date.now() - 95 * 3600 * 1000, text: 'Client approved final files. Payment processed.' },
+        ],
+        visibility: 'All designers',
+        visibleTo: [],
+      },
+    ];
+
+    await Project.insertMany(projectsData);
+    console.log(`[Seeder] Seeded ${projectsData.length} projects.`);
+
+    const paymentsData = [
+      {
+        id: 'PAY-2253',
+        date: '2026-04-18',
+        designerId: 'D3',
+        designerName: 'Rohan Fernando',
+        projectCode: 'P6',
+        projectTitle: 'Ayurvedic Spa Essential Oils Carton',
+        amount: 31000,
+        status: 'Paid',
+        method: 'Bank Transfer (Commercial Bank)',
+        reference: 'TXN-884920',
+      },
+      {
+        id: 'PAY-2251',
+        date: '2026-04-14',
+        designerId: 'D1',
+        designerName: 'Kasun Perera',
+        projectCode: 'P-PRV1',
+        projectTitle: 'Kola Kenda Pouch Packaging',
+        amount: 28000,
+        status: 'Paid',
+        method: 'Bank Transfer (Sampath Bank)',
+        reference: 'TXN-871142',
+      },
+      {
+        id: 'PAY-2248',
+        date: '2026-04-10',
+        designerId: 'D2',
+        designerName: 'Dilani Silva',
+        projectCode: 'P-PRV2',
+        projectTitle: 'Cinnamon Grand Ramadan Social Kit',
+        amount: 22000,
+        status: 'Paid',
+        method: 'Bank Transfer (HNB)',
+        reference: 'TXN-865301',
+      },
+      {
+        id: 'PAY-2234',
+        date: '2026-03-28',
+        designerId: 'D4',
+        designerName: 'Anuki Perera',
+        projectCode: 'P-PRV3',
+        projectTitle: 'Green Earth Stationery Kit',
+        amount: 35000,
+        status: 'Paid',
+        method: 'Bank Transfer (Commercial Bank)',
+        reference: 'TXN-850911',
+      },
+      {
+        id: 'PAY-2207',
+        date: '2026-03-15',
+        designerId: 'D1',
+        designerName: 'Kasun Perera',
+        projectCode: 'P-PRV4',
+        projectTitle: 'Lanka Honey Bottle Label',
+        amount: 24000,
+        status: 'Paid',
+        method: 'Bank Transfer (Sampath Bank)',
+        reference: 'TXN-839210',
+      },
+    ];
+
+    await Payment.insertMany(paymentsData);
+    console.log(`[Seeder] Seeded ${paymentsData.length} payments.`);
+    console.log('[Seeder] Database seeding finished successfully.');
+  } catch (error) {
+    console.error('[Seeder] Error seeding database:', error.message || error);
+  }
+};
+
+// Auto-run if executed directly via `node src/utils/seeder.js`
+if (process.argv[1]?.endsWith('seeder.js')) {
+  seedDatabase().then(() => process.exit(0)).catch(() => process.exit(1));
+}
